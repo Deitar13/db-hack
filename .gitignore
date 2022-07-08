@@ -137,3 +137,6 @@ poetry.lock
 # UMP
 /.upm
 .upm
+
+# Git
+.gitattributes
