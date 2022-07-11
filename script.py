@@ -1,11 +1,13 @@
 import random
 
-from datacenter.models import Subject, Schoolkid, Lesson, Commendation
+from datacenter.models import Subject, Schoolkid, Lesson
+from datacenter.models import Commendation, Mark, Chastisement
+from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 
 
-def create_commendation():
+def fix_academic_performance():
 
-    some_commendations = '''Молодец!
+    commendations = '''Молодец!
     Отлично!
     Хорошо!
     Гораздо лучше, чем я ожидал!
@@ -37,39 +39,58 @@ def create_commendation():
     Теперь у тебя точно все получится!
     '''
 
-    schoolkid = input('Введите ФИО ученика: ')
+    schoolkid_name = input('Введите ФИО ученика: ')
 
+    commendations = commendations.split('\n')
+    random_commendation = random.choice(commendations)
 
-    commendations_list = some_commendations.split('\n')
-    random_commendations = random.choice(commendations_list)
+    try:
+        schoolkid = Schoolkid.objects.get(full_name__contains=schoolkid_name)
 
-    child = Schoolkid.objects.filter(full_name__contains=f'{schoolkid}')
-
-    if len(child) > 1 or len(child) == 0:
-        print('ПРОБЛЕМА С ПОИСКОМ УЧЕНИКА, РЕЗУЛЬТАТОВ ПОИСКА:', len(child))
-        return
-
-    else:
         subject = Subject.objects.filter(
-            year_of_study=child[0].year_of_study
+            year_of_study=schoolkid.year_of_study
         ).order_by('?').first()
-
         lesson = Lesson.objects.filter(
-            year_of_study=child[0].year_of_study,
-            group_letter__contains=child[0].group_letter,
+            year_of_study=schoolkid.year_of_study,
+            group_letter__contains=schoolkid.group_letter,
             subject=subject
         ).order_by('?').first()
-
         Commendation.objects.create(
-            text=f'{random_commendations}',
-            schoolkid=child[0],
+            text=random_commendation,
+            schoolkid=schoolkid,
             created=lesson.date,
             teacher=lesson.teacher,
             subject=lesson.subject
         )
-
-        print(f'Создана похвала: {random_commendations}')
+        print(f'Создана похвала: {random_commendation}')
         print(f'Предмет: {lesson.subject}')
-        print(f'Для ученика: {child[0]}')
+        print(f'Для ученика: {schoolkid}')
         print(f'От учителя: {lesson.teacher}')
+
+        chastisement = Chastisement.objects.filter(
+            schoolkid__full_name__contains=schoolkid_name
+        )
+        chastisement.delete()
+        print('Замечания удалены')
+
+        bad_marks_count = Mark.objects.filter(
+            schoolkid__full_name__contains=schoolkid_name,
+            points__lte=3
+        ).count()
+
+        for n in range(bad_marks_count):
+            bad_mark = Mark.objects.filter(
+                schoolkid__full_name__contains=schoolkid_name,
+                points__lte=3
+            ).first()
+            bad_mark.points = 5
+            bad_mark.save()
+        print('Плохие оценки исправлены')
+        return
+
+    except ObjectDoesNotExist:
+        print('Ошибка поиска ученика, ученик не найден')
+        return
+    except MultipleObjectsReturned:
+        print('Ошибка поиска ученика, найдено больше одного')
         return

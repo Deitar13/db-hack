@@ -3,14 +3,38 @@
 Скрипт случайным образом выбирает похвалу из 30 вариантов и приписывает к случайному уроку.
 Имя ученика вводится вручную, осуществляется проверка на наличие ученика в базе.
 
-## Запуск
+## Установка и запуск
 
 - Скачайте скрипт
 - Поместите скрипт в папку с manage.py
 - Запустите консоль `python3 manage.py shell`
-- Импортируйте скрипт через консоль `from script import create_commendation`
-- Запустите скрипт `create_commendation()`
-- Введите ФИО ученика
+
+## Работа скрипта
+
+Для запуска скрипта скопируйте данные команды в консоль:
+```
+from script import fix_academic_performance
+fix_academic_performance()
+```
+
+Пример работы скрипта:
+```
+\e-diary-master>python manage.py shell
+Python 3.10.0 (tags/v3.10.0:b494f59, Oct  4 2021, 19:00:18) [MSC v.1929 64 bit (AMD64)] on win32
+Type "help", "copyright", "credits" or "license" for more information.
+(InteractiveConsole)
+
+>>> from script import fix_academic_performance
+>>> fix_academic_performance()
+Введите ФИО ученика: Фролов Иван
+Создана похвала:     С каждым разом у тебя получается всё лучше!
+Предмет: История 6 класса
+Для ученика: Фролов Иван Григорьевич 6А
+От учителя: Павлова Синклитикия Валентиновна
+Замечания удалены
+Плохие оценки исправлены
+>>>
+```
 
 ## Цели проекта
 
